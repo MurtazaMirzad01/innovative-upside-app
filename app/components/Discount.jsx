@@ -4,6 +4,7 @@ import { Form, useFetcher } from "react-router";
 export default function Discount() {
   const [title, setTitle] = useState("");
   const [percentage, setPercentage] = useState("");
+  const [message, setMessage] = useState("");
   const [products, setProducts] = useState([]);
   const [productDistount, setProductDiscount] = useState("");
   const [oderDiscount, setOrderDiscount] = useState("");
@@ -18,6 +19,7 @@ export default function Discount() {
       {
         title,
         percentage,
+        message,
         product: JSON.stringify(products),
         productDistount,
         oderDiscount,
@@ -77,7 +79,7 @@ export default function Discount() {
         >
           <s-stack gap="base">
             <s-query-container>
-              <s-grid gridTemplateColumns="@container (inline-size > 500px) 1fr 1fr, 1fr" gap="base">
+              <s-grid gridTemplateColumns="@container (inline-size > 300px) 1fr 1fr 1fr, 1fr" gap="base">
                 <s-grid-item>
                   <s-text-field
                     label="Title"
@@ -91,6 +93,13 @@ export default function Discount() {
                     label="Percentage"
                     value={percentage}
                     onChange={(e) => setPercentage(e.target.value)}
+                  />
+                </s-grid-item>
+                <s-grid-item>
+                  <s-text-field
+                    label="Message"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
                   />
                 </s-grid-item>
               </s-grid>

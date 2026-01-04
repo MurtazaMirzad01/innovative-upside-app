@@ -1,4 +1,4 @@
-query CartInput {
+query Input {
   cart {
     lines {
       id
@@ -7,9 +7,23 @@ query CartInput {
           amount
         }
       }
+      merchandise {
+        __typename
+        ... on ProductVariant {
+          product {
+            id
+          }
+        }
+      }
     }
   }
   discount {
     discountClasses
+    metafield(
+      namespace: "custom"
+      key: "function-configuration"
+    ) {
+      jsonValue
+    }
   }
 }
