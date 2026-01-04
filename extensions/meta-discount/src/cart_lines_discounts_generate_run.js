@@ -17,6 +17,7 @@ import {
 
 export function cartLinesDiscountsGenerateRun(input) {
   const operations = [];
+  console.log(JSON.stringify(input));
 
   const config = input.discount?.metafield?.jsonValue;
 
@@ -56,7 +57,7 @@ export function cartLinesDiscountsGenerateRun(input) {
       ) {
         targets.push({
           productVariant: {
-            id: line.id,
+            id: line.merchandise.id,
           },
         });
       }
