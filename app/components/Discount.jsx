@@ -32,6 +32,7 @@ export default function Discount() {
     console.log("Form submitted");
     setTitle("");
     setPercentage("");
+    setMessage("");
     setProducts([]);
     setProductDiscount(false);
     setOrderDiscount(false);
@@ -42,6 +43,7 @@ export default function Discount() {
   function handleDiscard() {
     setTitle("");
     setPercentage("");
+    setMessage("");
     setProducts([]);
     setProductDiscount(false);
     setOrderDiscount(false);

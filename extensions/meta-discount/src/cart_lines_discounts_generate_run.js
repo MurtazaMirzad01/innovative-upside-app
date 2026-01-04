@@ -16,81 +16,98 @@ import {
   */
 
 export function cartLinesDiscountsGenerateRun(input) {
-  if (!input.cart.lines.length) {
-    return {operations: []};
-  }
-
-  const hasOrderDiscountClass = input.discount.discountClasses.includes(
-    DiscountClass.Order,
-  );
-  const hasProductDiscountClass = input.discount.discountClasses.includes(
-    DiscountClass.Product,
-  );
-
-  if (!hasOrderDiscountClass && !hasProductDiscountClass) {
-    return {operations: []};
-  }
-
-  const maxCartLine = input.cart.lines.reduce((maxLine, line) => {
-    if (line.cost.subtotalAmount.amount > maxLine.cost.subtotalAmount.amount) {
-      return line;
-    }
-    return maxLine;
-  }, input.cart.lines[0]);
-
   const operations = [];
 
-  if (hasOrderDiscountClass) {
+  const config = input.discount?.metafield?.jsonValue;
+
+  // Safety check
+  if (!config || !config.percentage) {
+    return { operations };
+  }
+
+  const {
+    percentage,
+    message,
+    productIds = [],
+    productDiscount,
+    orderDiscount,
+    shippingDiscount,
+  } = config;
+
+  const discountClasses = input.discount.discountClasses;
+
+  /**
+   * PRODUCT DISCOUNT
+   */
+  if (
+    productDiscount &&
+    discountClasses.includes("PRODUCT")
+  ) {
+    const targets = [];
+
+    for (const line of input.cart.lines) {
+      if (line.merchandise.__typename !== "ProductVariant") continue;
+
+      const productId = line.merchandise.product.id;
+
+      if (
+        productIds.length === 0 ||
+        productIds.includes(productId)
+      ) {
+        targets.push({
+          productVariant: {
+            id: line.id,
+          },
+        });
+      }
+    }
+
+    if (targets.length > 0) {
+      operations.push({
+        productDiscountsAdd: {
+          discounts: [
+            {
+              message: message || `${percentage}% OFF`,
+              value: {
+                percentage: {
+                  value: percentage,
+                },
+              },
+              targets,
+            },
+          ],
+        },
+      });
+    }
+  }
+
+  /**
+   * ORDER DISCOUNT
+   */
+  if (
+    orderDiscount &&
+    discountClasses.includes("ORDER")
+  ) {
     operations.push({
       orderDiscountsAdd: {
-        candidates: [
+        discounts: [
           {
-            message: '10% OFF ORDER',
-            targets: [
-              {
-                orderSubtotal: {
-                  excludedCartLineIds: [],
-                },
-              },
-            ],
+            message: message || `${percentage}% OFF ORDER`,
             value: {
               percentage: {
-                value: 10,
+                value: percentage,
               },
             },
-          },
-        ],
-        selectionStrategy: OrderDiscountSelectionStrategy.First,
-      },
-    });
-  }
-
-  if (hasProductDiscountClass) {
-    operations.push({
-      productDiscountsAdd: {
-        candidates: [
-          {
-            message: '20% OFF PRODUCT',
             targets: [
               {
-                cartLine: {
-                  id: maxCartLine.id,
-                },
+                orderSubtotal: {},
               },
             ],
-            value: {
-              percentage: {
-                value: 20,
-              },
-            },
           },
         ],
-        selectionStrategy: ProductDiscountSelectionStrategy.First,
-      },
+      }
     });
   }
-
-  return {
-    operations,
-  };
+  return { operations };
 }
+
