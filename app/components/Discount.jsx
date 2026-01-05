@@ -38,7 +38,6 @@ export default function Discount() {
     setProducts([]);
   }
 
-
   async function handleProductBrowse() {
     const selected = await shopify.resourcePicker({
       multiple: true,
