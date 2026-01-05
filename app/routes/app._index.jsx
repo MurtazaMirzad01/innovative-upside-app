@@ -53,6 +53,11 @@ export const action = async ({ request }) => {
     ? product.map(p => p.id)
     : [];
 
+  console.log("=========================================================================")
+  console.log(productIds);
+  console.log("=========================================================================")
+
+
   const metafieldConfig = {
     title,
     percentage,

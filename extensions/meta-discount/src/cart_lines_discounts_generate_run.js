@@ -17,11 +17,8 @@ import {
 
 export function cartLinesDiscountsGenerateRun(input) {
   const operations = [];
-  console.log(JSON.stringify(input));
-
   const config = input.discount?.metafield?.jsonValue;
 
-  // Safety check
   if (!config || !config.percentage) {
     return { operations };
   }
@@ -31,84 +28,51 @@ export function cartLinesDiscountsGenerateRun(input) {
     message,
     productIds = [],
     productDiscount,
-    orderDiscount,
-    shippingDiscount,
   } = config;
 
-  const discountClasses = input.discount.discountClasses;
-
-  /**
-   * PRODUCT DISCOUNT
-   */
   if (
-    productDiscount &&
-    discountClasses.includes("PRODUCT")
+    !productDiscount ||
+    !input.discount.discountClasses.includes("PRODUCT")
   ) {
-    const targets = [];
+    return { operations };
+  }
 
-    for (const line of input.cart.lines) {
-      if (line.merchandise.__typename !== "ProductVariant") continue;
+  const targets = [];
 
-      const productId = line.merchandise.product.id;
+  for (const line of input.cart.lines) {
+    if (line.merchandise.__typename !== "ProductVariant") continue;
 
-      if (
-        productIds.length === 0 ||
-        productIds.includes(productId)
-      ) {
-        targets.push({
-          productVariant: {
-            id: line.merchandise.id,
-          },
-        });
-      }
-    }
+    const productId = line.merchandise.product.id;
 
-    if (targets.length > 0) {
-      operations.push({
-        productDiscountsAdd: {
-          discounts: [
-            {
-              message: message || `${percentage}% OFF`,
-              value: {
-                percentage: {
-                  value: percentage,
-                },
-              },
-              targets,
-            },
-          ],
+    if (productIds.length === 0 || productIds.includes(productId)) {
+      targets.push({
+        cartLine: {
+          id: line.id,
         },
       });
     }
   }
 
-  /**
-   * ORDER DISCOUNT
-   */
-  if (
-    orderDiscount &&
-    discountClasses.includes("ORDER")
-  ) {
-    operations.push({
-      orderDiscountsAdd: {
-        discounts: [
-          {
-            message: message || `${percentage}% OFF ORDER`,
-            value: {
-              percentage: {
-                value: percentage,
-              },
-            },
-            targets: [
-              {
-                orderSubtotal: {},
-              },
-            ],
-          },
-        ],
-      }
-    });
+  if (targets.length === 0) {
+    return { operations };
   }
+
+  operations.push({
+    productDiscountsAdd: {
+      selectionStrategy: "ALL",
+      candidates: [
+        {
+          message: message || `${percentage}% OFF`,
+          value: {
+            percentage: {
+              value: percentage,
+            },
+          },
+          targets,
+        },
+      ],
+    },
+  });
+
   return { operations };
 }
-
