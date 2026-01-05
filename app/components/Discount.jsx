@@ -6,9 +6,6 @@ export default function Discount() {
   const [percentage, setPercentage] = useState("");
   const [message, setMessage] = useState("");
   const [products, setProducts] = useState([]);
-  const [productDistount, setProductDiscount] = useState("");
-  const [oderDiscount, setOrderDiscount] = useState("");
-  const [shippingDiscount, setShippingDiscount] = useState("");
 
   const fetcher = useFetcher();
 
@@ -21,9 +18,6 @@ export default function Discount() {
         percentage,
         message,
         product: JSON.stringify(products),
-        productDistount,
-        oderDiscount,
-        shippingDiscount,
         actionType: "create",
       },
       { method: "post" }
@@ -34,9 +28,6 @@ export default function Discount() {
     setPercentage("");
     setMessage("");
     setProducts([]);
-    setProductDiscount(false);
-    setOrderDiscount(false);
-    setShippingDiscount(false);
   }
 
 
@@ -45,9 +36,6 @@ export default function Discount() {
     setPercentage("");
     setMessage("");
     setProducts([]);
-    setProductDiscount(false);
-    setOrderDiscount(false);
-    setShippingDiscount(false);
   }
 
 
@@ -76,8 +64,8 @@ export default function Discount() {
       <s-section heading="Amount off products">
         <Form
           data-save-bar
-          onSubmit={handleSubmit}  // Changed from string to function
-          onReset={handleDiscard}  // Changed from string to function
+          onSubmit={handleSubmit}
+          onReset={handleDiscard}
         >
           <s-stack gap="base">
             <s-query-container>
@@ -141,26 +129,6 @@ export default function Discount() {
                 ))}
               </s-stack>
             )}
-            <s-divider />
-            <s-heading>Combinations</s-heading>
-            <s-stack gap="small-200">
-              <s-checkbox
-                label="Product Discounts"
-                checked={productDistount}
-                onChange={(e) => setProductDiscount(e.target.checked)}
-              />
-              <s-checkbox
-                label="Order Discounts"
-                checked={oderDiscount}
-                onChange={(e) => setOrderDiscount(e.target.checked)}
-              />
-              <s-checkbox
-                label="Shipping Discounts"
-                checked={shippingDiscount}
-                onChange={(e) => setShippingDiscount(e.target.checked)}
-              />
-
-            </s-stack>
           </s-stack>
         </Form>
       </s-section>

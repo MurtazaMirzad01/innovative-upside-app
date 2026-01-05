@@ -27,11 +27,9 @@ export function cartLinesDiscountsGenerateRun(input) {
     percentage,
     message,
     productIds = [],
-    productDiscount,
   } = config;
 
   if (
-    !productDiscount ||
     !input.discount.discountClasses.includes("PRODUCT")
   ) {
     return { operations };
