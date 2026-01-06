@@ -1,64 +1,60 @@
-import { useLoaderData, useFetcher } from "react-router";
-import { useEffect } from "react";
+import DiscountsList from "../components/DiscountsList";
+import { authenticate } from "../shopify.server";
 
-export default function AdditionalPage() {
-  const loaderData = useLoaderData();
-  const fetcher = useFetcher();
+export const loader = async ({ request }) => {
+  const { admin } = await authenticate.admin(request);
 
-  const metaobjects = loaderData?.getData?.data?.metaobjects?.edges || [];
-
-  const data = metaobjects.map(({ node }) => {
-    const titleField = node.fields.find((f) => f.key === "title");
-    const percentageField = node.fields.find((f) => f.key === "percentage");
-    const messageField = node.fields.find((f) => f.key === "message");
-
-    return {
-      id: node.id,
-      title: titleField?.value || "",
-      percentage: percentageField?.value || "",
-      message: messageField?.value || "",
-    };
-  });
-
-  // refresh on mutation complete
-  useEffect(() => {
-    if (fetcher.state === "idle" && fetcher.data) {
-      if (fetcher.data.metaobjectUpdate || fetcher.data.metaobjectDelete) {
-        window.location.reload();
-      }
-    }
-  }, [fetcher.state, fetcher.data]);
-  return (
-    <s-section>
-      <s-table>
-        <s-table-header-row>
-          <s-table-header>title</s-table-header>
-          <s-table-header>percentage</s-table-header>
-          <s-table-header>message</s-table-header>
-          <s-table-header>Actions</s-table-header>
-        </s-table-header-row>
-
-        <s-table-body>
-          {data.map((item) => (
-            <s-table-row key={item.id}>
-              <s-table-cell>{item.title}</s-table-cell>
-              <s-table-cell>{item.percentage}</s-table-cell>
-              <s-table-cell>{item.message}</s-table-cell>
-              <s-table-cell style={{ display: "flex", gap: "8px" }}>
-                {/* <EditAppView
-                  id={item.id}
-                  modalId={`edit-modal-${item.id.replace(/[^a-zA-Z0-9]/g, '-')}`}
-                />
-
-                <DeleteAppView
-                  id={item.id}
-                  modalId={`delete-modal-${item.id.replace(/[^a-zA-Z0-9]/g, '-')}`}
-                /> */}
-              </s-table-cell>
-            </s-table-row>
-          ))}
-        </s-table-body>
-      </s-table>
-    </s-section>
+  const getResponse = await admin.graphql(
+    `#graphql
+      query {
+        metaobjects(type: "discount_metaobject", first: 100) {
+          edges {
+            node {
+              id
+              type
+              fields {
+                key
+                value
+              }
+            }
+          }
+        }
+      }`
   );
+
+  const getData = await getResponse.json();
+  return { getData };
+};
+
+export const action = async ({ request }) => {
+  const { admin } = await authenticate.admin(request);
+  const formData = await request.formData();
+
+  const id = formData.get("id");
+  const actionType = formData.get("actionType");
+
+  // DELETE
+  if (actionType === "delete") {
+    const res = await admin.graphql(
+      `#graphql
+        mutation MetaobjectDelete($id: ID!) {
+          metaobjectDelete(id: $id) {
+            deletedId
+            userErrors {
+              field
+              message
+            }
+          }
+        }`,
+      { variables: { id } }
+    );
+    return await res.json();
+
+  }
+
+}
+
+
+export default function Discountlist() {
+  return <DiscountsList />;
 }
