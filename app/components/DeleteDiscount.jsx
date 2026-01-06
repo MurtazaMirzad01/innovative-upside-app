@@ -1,7 +1,11 @@
 import { useFetcher } from "react-router";
 
-export default function DeleteDiscount({ id, modalId }) { // Accept modalId prop
+export default function DeleteDiscount({ id, modalId, discountId }) { // Accept modalId prop
   const fetcher = useFetcher();
+
+  console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+  console.log(discountId);
+  console.log("=================================================================");
 
   function handleSubmit(event) {
     event.preventDefault();

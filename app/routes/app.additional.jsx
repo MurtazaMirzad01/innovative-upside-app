@@ -4,27 +4,62 @@ import { authenticate } from "../shopify.server";
 export const loader = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
 
-  const getResponse = await admin.graphql(
-    `#graphql
-      query {
-        metaobjects(type: "discount_metaobject", first: 100) {
-          edges {
-            node {
-              id
-              type
-              fields {
-                key
-                value
-              }
+  /* 1️⃣ Metaobjects */
+  const metaRes = await admin.graphql(`
+    #graphql
+    query {
+      metaobjects(type: "discount_metaobject", first: 100) {
+        edges {
+          node {
+            id
+            type
+            fields {
+              key
+              value
             }
           }
         }
-      }`
+      }
+    }
+  `);
+
+  const metaJson = await metaRes.json();
+  const metaobjects = metaJson.data.metaobjects.edges.map(
+    (edge) => edge.node
   );
 
-  const getData = await getResponse.json();
-  return { getData };
+  /* 2️⃣ Discounts */
+  const discountRes = await admin.graphql(`
+    #graphql
+    query {
+      discountNodes(first: 10) {
+        edges {
+          node {
+            id
+            discount {
+              __typename
+            }
+          }
+        }
+      }
+    }
+  `);
+
+  const discountJson = await discountRes.json();
+  const discounts = discountJson.data.discountNodes.edges.map(
+    (edge) => edge.node
+  );
+
+  console.log("Metaobjects:", metaobjects);
+  console.log("Discounts:", discounts);
+
+  // ✅ React Router loader MUST return plain data
+  return {
+    metaobjects,
+    discounts,
+  };
 };
+
 
 export const action = async ({ request }) => {
   const { admin } = await authenticate.admin(request);

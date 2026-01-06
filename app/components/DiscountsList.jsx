@@ -4,12 +4,10 @@ import DeleteDiscount from "../components/DeleteDiscount";
 import EditDiscount from "../components/EditDiscount";
 
 export default function DiscountsList() {
-  const loaderData = useLoaderData();
+  const { metaobjects, discounts } = useLoaderData();
   const fetcher = useFetcher();
 
-  const metaobjects = loaderData?.getData?.data?.metaobjects?.edges || [];
-
-  const data = metaobjects.map(({ node }) => {
+  const data = metaobjects.map((node) => {
     const titleField = node.fields.find((f) => f.key === "title");
     const percentageField = node.fields.find((f) => f.key === "percentage");
     const messageField = node.fields.find((f) => f.key === "message");
@@ -21,10 +19,15 @@ export default function DiscountsList() {
       message: messageField?.value || "",
     };
   });
+  const discountId = discounts.map((discount => discount.id));
 
-  console.log("=================================================================");
-  console.log(loaderData);
-  console.log("=================================================================");
+  // const discountID = discountId[0]
+  // console.log("=================================================================");
+  // console.log(discountID);
+  // console.log("=================================================================");
+
+
+
 
   // refresh on mutation complete
   useEffect(() => {
@@ -46,7 +49,7 @@ export default function DiscountsList() {
           </s-table-header-row>
 
           <s-table-body>
-            {data.map((item) => (
+            {data.map((item, index) => (
               <s-table-row key={item.id}>
                 <s-table-cell>{item.title}</s-table-cell>
                 <s-table-cell>{item.percentage}</s-table-cell>
@@ -59,6 +62,7 @@ export default function DiscountsList() {
 
                   <DeleteDiscount
                     id={item.id}
+                    discountId={discountId[index]}
                     modalId={`delete-modal-${item.id.replace(/[^a-zA-Z0-9]/g, '-')}`}
                   />
                 </s-table-cell>
