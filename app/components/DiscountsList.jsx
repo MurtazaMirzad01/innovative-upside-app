@@ -1,6 +1,7 @@
 import { useLoaderData, useFetcher } from "react-router";
 import { useEffect } from "react";
 import DeleteDiscount from "../components/DeleteDiscount";
+import EditDiscount from "../components/EditDiscount";
 
 export default function DiscountsList() {
   const loaderData = useLoaderData();
@@ -51,10 +52,10 @@ export default function DiscountsList() {
                 <s-table-cell>{item.percentage}</s-table-cell>
                 <s-table-cell>{item.message}</s-table-cell>
                 <s-table-cell style={{ display: "flex", gap: "8px" }}>
-                  {/* <EditAppView
-                  id={item.id}
-                  modalId={`edit-modal-${item.id.replace(/[^a-zA-Z0-9]/g, '-')}`}
-                /> */}
+                  <EditDiscount
+                    id={item.id}
+                    modalId={`edit-modal-${item.id.replace(/[^a-zA-Z0-9]/g, '-')}`}
+                  />
 
                   <DeleteDiscount
                     id={item.id}

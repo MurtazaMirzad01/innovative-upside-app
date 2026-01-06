@@ -51,6 +51,45 @@ export const action = async ({ request }) => {
     return await res.json();
 
   }
+  // UPDATE (FIXED VERSION)
+  if (actionType === "update") {
+    const title = formData.get("title");
+    const percentage = formData.get("percentage");
+    const message = formData.get("message");
+    const product = formData.get("product");
+
+    const res = await admin.graphql(
+      `#graphql
+        mutation UpdateMetaobject(
+          $id: ID!
+          $fields: [MetaobjectFieldInput!]!
+        ) {
+          metaobjectUpdate(id: $id, metaobject: { fields: $fields }) {
+            metaobject {
+              id
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }`,
+      {
+        variables: {
+          id,
+          fields: [
+            { key: "title", value: title },
+            { key: "percentage", value: percentage },
+            { key: "message", value: message },
+            { key: "product", value: product },
+
+          ],
+        },
+      }
+    );
+
+    return await res.json();
+  }
 
 }
 
