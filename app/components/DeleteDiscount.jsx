@@ -14,6 +14,7 @@ export default function DeleteDiscount({ id, modalId, discountId }) { // Accept 
       {
         id: id,
         actionType: "delete",
+        discountId: discountId
       },
       { method: "post" }
     );

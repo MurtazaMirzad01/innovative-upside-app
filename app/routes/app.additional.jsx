@@ -64,27 +64,48 @@ export const loader = async ({ request }) => {
 export const action = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
   const formData = await request.formData();
-
   const id = formData.get("id");
+  const discountId = formData.get("discountId");
   const actionType = formData.get("actionType");
 
-  // DELETE
-  if (actionType === "delete") {
+  // 1️⃣ Delete discount FIRST
+  if (discountId) {
+    await admin.graphql(
+      `#graphql
+  mutation discountAutomaticDelete($id: ID!) {
+    discountAutomaticDelete(id: $id) {
+      deletedAutomaticDiscountId
+      userErrors {
+        field
+        code
+        message
+      }
+    }
+  }`,
+      {
+        variables: {
+          "id": discountId
+        },
+      },
+    );
+  }
+
+  // 2️⃣ Delete metaobject
+  if (id) {
     const res = await admin.graphql(
       `#graphql
-        mutation MetaobjectDelete($id: ID!) {
-          metaobjectDelete(id: $id) {
-            deletedId
-            userErrors {
-              field
-              message
-            }
+      mutation MetaobjectDelete($id: ID!) {
+        metaobjectDelete(id: $id) {
+          deletedId
+          userErrors {
+            message
           }
-        }`,
-      { variables: { id } }
+        }
+      }`,
+      { variables: { id: id } }
     );
-    return await res.json();
 
+    return await res.json(); // React Router allows returning any value
   }
   // UPDATE (FIXED VERSION)
   if (actionType === "update") {
@@ -126,7 +147,8 @@ export const action = async ({ request }) => {
     return await res.json();
   }
 
-}
+  return null;
+};
 
 
 export default function Discountlist() {
