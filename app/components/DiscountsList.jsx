@@ -57,6 +57,7 @@ export default function DiscountsList() {
                 <s-table-cell style={{ display: "flex", gap: "8px" }}>
                   <EditDiscount
                     id={item.id}
+                    discountId={discountId[index]}
                     modalId={`edit-modal-${item.id.replace(/[^a-zA-Z0-9]/g, '-')}`}
                   />
 

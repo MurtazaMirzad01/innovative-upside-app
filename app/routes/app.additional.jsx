@@ -4,7 +4,7 @@ import { authenticate } from "../shopify.server";
 export const loader = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
 
-  /* 1️⃣ Metaobjects */
+  // Metaobjects
   const metaRes = await admin.graphql(`
     #graphql
     query {
@@ -28,7 +28,7 @@ export const loader = async ({ request }) => {
     (edge) => edge.node
   );
 
-  /* 2️⃣ Discounts */
+  // Discounts
   const discountRes = await admin.graphql(`
     #graphql
     query {
@@ -53,13 +53,11 @@ export const loader = async ({ request }) => {
   console.log("Metaobjects:", metaobjects);
   console.log("Discounts:", discounts);
 
-  // ✅ React Router loader MUST return plain data
   return {
     metaobjects,
     discounts,
   };
 };
-
 
 export const action = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
@@ -68,7 +66,7 @@ export const action = async ({ request }) => {
   const discountId = formData.get("discountId");
   const actionType = formData.get("actionType");
 
-  // 1️⃣ Delete discount FIRST
+  //  Delete discount FIRST
   if (actionType === "delete") {
     if (discountId) {
       await admin.graphql(
@@ -91,7 +89,7 @@ export const action = async ({ request }) => {
       );
     }
 
-    // 2️⃣ Delete metaobject
+    // Delete metaobject
     if (id) {
       const res = await admin.graphql(
         `#graphql
@@ -106,16 +104,17 @@ export const action = async ({ request }) => {
         { variables: { id: id } }
       );
 
-      return await res.json(); // React Router allows returning any value
+      return await res.json();
     }
   }
-  // UPDATE (FIXED VERSION)
+  // Update
   if (actionType === "update") {
     const title = formData.get("title");
     const percentage = formData.get("percentage");
     const message = formData.get("message");
     const product = formData.get("product");
 
+    //update Metaobjects
     const res = await admin.graphql(
       `#graphql
         mutation UpdateMetaobject(
@@ -140,18 +139,51 @@ export const action = async ({ request }) => {
             { key: "percentage", value: percentage },
             { key: "message", value: message },
             { key: "product", value: product },
-
           ],
         },
       }
     );
 
+    //update Discounts
+    context = [];
+    const updRes = await admin.graphql(
+      `#graphql
+  mutation discountAutomaticAppUpdate($automaticAppDiscount: DiscountAutomaticAppInput!, $id: ID!) {
+    discountAutomaticAppUpdate(automaticAppDiscount: $automaticAppDiscount, id: $id) {
+      automaticAppDiscount {
+        title
+        context {
+          ... on DiscountCustomerSegments {
+            segments {
+              id
+            }
+          }
+        }
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }`,
+      {
+        variables: {
+          "id": discountId,
+          "automaticAppDiscount": {
+            "context": {
+              "all": {
+                "All"
+              }
+            }
+          }
+        },
+      },
+    );
     return await res.json();
   }
 
   return null;
 };
-
 
 export default function Discountlist() {
   return <DiscountsList />;

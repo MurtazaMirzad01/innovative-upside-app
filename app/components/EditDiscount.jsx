@@ -1,7 +1,7 @@
 import { useFetcher, useLoaderData } from "react-router";
 import { useState, useEffect } from "react";
 
-export default function EditDiscount({ id, modalId }) {
+export default function EditDiscount({ id, modalId, discountId }) {
   const fetcher = useFetcher();
   const loaderData = useLoaderData();
 
@@ -40,6 +40,7 @@ export default function EditDiscount({ id, modalId }) {
         product: JSON.stringify(products),
         id,
         actionType: "update",
+        discountId: discountId
       },
       { method: "post" }
     );
@@ -81,7 +82,6 @@ export default function EditDiscount({ id, modalId }) {
       <s-modal
         id={modalId} // Use the unique modal ID
       >
-        {/* Modal content remains the same */}
         <s-stack gap="base">
           <s-query-container>
             <s-grid gridTemplateColumns="@container (inline-size > 500px) 1fr 1fr, 1fr" gap="base">
