@@ -69,9 +69,10 @@ export const action = async ({ request }) => {
   const actionType = formData.get("actionType");
 
   // 1️⃣ Delete discount FIRST
-  if (discountId) {
-    await admin.graphql(
-      `#graphql
+  if (actionType === "delete") {
+    if (discountId) {
+      await admin.graphql(
+        `#graphql
   mutation discountAutomaticDelete($id: ID!) {
     discountAutomaticDelete(id: $id) {
       deletedAutomaticDiscountId
@@ -82,18 +83,18 @@ export const action = async ({ request }) => {
       }
     }
   }`,
-      {
-        variables: {
-          "id": discountId
+        {
+          variables: {
+            "id": discountId
+          },
         },
-      },
-    );
-  }
+      );
+    }
 
-  // 2️⃣ Delete metaobject
-  if (id) {
-    const res = await admin.graphql(
-      `#graphql
+    // 2️⃣ Delete metaobject
+    if (id) {
+      const res = await admin.graphql(
+        `#graphql
       mutation MetaobjectDelete($id: ID!) {
         metaobjectDelete(id: $id) {
           deletedId
@@ -102,10 +103,11 @@ export const action = async ({ request }) => {
           }
         }
       }`,
-      { variables: { id: id } }
-    );
+        { variables: { id: id } }
+      );
 
-    return await res.json(); // React Router allows returning any value
+      return await res.json(); // React Router allows returning any value
+    }
   }
   // UPDATE (FIXED VERSION)
   if (actionType === "update") {

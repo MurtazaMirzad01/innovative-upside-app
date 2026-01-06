@@ -1,7 +1,7 @@
 import { useFetcher, useLoaderData } from "react-router";
 import { useState, useEffect } from "react";
 
-export default function EditAppView({ id, modalId }) { // Accept modalId prop
+export default function EditDiscount({ id, modalId }) {
   const fetcher = useFetcher();
   const loaderData = useLoaderData();
 
@@ -11,17 +11,16 @@ export default function EditAppView({ id, modalId }) { // Accept modalId prop
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    const metaobjects = loaderData?.getData?.data?.metaobjects?.edges || [];
+    const metaobjects = loaderData?.metaobjects || [];
 
     // Find the specific item by ID
-    const foundItem = metaobjects.find(({ node }) => node.id === id);
+    const foundItem = metaobjects.find((node) => node.id === id);
 
     if (foundItem) {
-      const node = foundItem.node;
-      const titleField = node.fields.find((f) => f.key === "title");
-      const percentageField = node.fields.find((f) => f.key === "percentage");
-      const messageField = node.fields.find((f) => f.key === "message");
-      const productField = node.fields.find((f) => f.key === "product");
+      const titleField = foundItem.fields.find((f) => f.key === "title");
+      const percentageField = foundItem.fields.find((f) => f.key === "percentage");
+      const messageField = foundItem.fields.find((f) => f.key === "message");
+      const productField = foundItem.fields.find((f) => f.key === "product");
 
       setTitle(titleField?.value || "");
       setPercentage(percentageField?.value || "");
@@ -35,44 +34,41 @@ export default function EditAppView({ id, modalId }) { // Accept modalId prop
 
     fetcher.submit(
       {
-        title: title,
-        percentage: percentage,
-        message: message,
+        title,
+        percentage,
+        message,
         product: JSON.stringify(products),
-        id: id,
+        id,
         actionType: "update",
       },
       { method: "post" }
     );
 
     console.log("Form submitted");
+
+    // Reset form fields
     setTitle("");
     setPercentage("");
-    setMessage
+    setMessage("");
     setProducts([]);
   }
 
   async function handleProductBrowse() {
     const selected = await shopify.resourcePicker({
       multiple: true,
-      type: "product"
+      type: "product",
     });
 
-    setProducts(prevProducts => {
-      const existingIds = new Set(prevProducts.map(p => p.id));
-      const newProducts = selected.filter(
-        product => !existingIds.has(product.id)
-      );
+    setProducts((prevProducts) => {
+      const existingIds = new Set(prevProducts.map((p) => p.id));
+      const newProducts = selected.filter((product) => !existingIds.has(product.id));
       return [...prevProducts, ...newProducts];
     });
   }
 
   function handleRemoveProductFromCard(productId) {
-    setProducts(prevProducts =>
-      prevProducts.filter(product => product.id !== productId)
-    );
+    setProducts((prevProducts) => prevProducts.filter((product) => product.id !== productId));
   }
-
   return (
     <>
       <s-button
@@ -155,8 +151,8 @@ export default function EditAppView({ id, modalId }) { // Accept modalId prop
           slot="primary-action"
           variant="primary"
           commandFor={modalId}
-          command="--hide"
           onClick={handleSubmit}
+          command="--hide"
         >
           Save
         </s-button>
