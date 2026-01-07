@@ -16,6 +16,11 @@ import {
   */
 
 export function cartLinesDiscountsGenerateRun(input) {
+  const stringifiedInput = JSON.stringify(input);
+  console.log("======================================================");
+  console.log(stringifiedInput);
+  console.log("======================================================");
+
   const operations = [];
   const config = input.discount?.metafield?.jsonValue;
 

@@ -113,6 +113,9 @@ export const action = async ({ request }) => {
     const percentage = formData.get("percentage");
     const message = formData.get("message");
     const product = formData.get("product");
+    const productIds = Array.isArray(product)
+      ? product.map(p => p.id)
+      : [];
 
     //update Metaobjects
     const res = await admin.graphql(
@@ -143,22 +146,26 @@ export const action = async ({ request }) => {
         },
       }
     );
-
+    const metafieldConfig = {
+      title,
+      percentage,
+      message,
+      productIds,
+    };
     //update Discounts
-    context = [];
+
     const updRes = await admin.graphql(
       `#graphql
-  mutation discountAutomaticAppUpdate($automaticAppDiscount: DiscountAutomaticAppInput!, $id: ID!) {
-    discountAutomaticAppUpdate(automaticAppDiscount: $automaticAppDiscount, id: $id) {
+  mutation discountAutomaticAppUpdate(
+    $automaticAppDiscount: DiscountAutomaticAppInput!,
+    $id: ID!
+  ) {
+    discountAutomaticAppUpdate(
+      automaticAppDiscount: $automaticAppDiscount,
+      id: $id
+    ) {
       automaticAppDiscount {
         title
-        context {
-          ... on DiscountCustomerSegments {
-            segments {
-              id
-            }
-          }
-        }
       }
       userErrors {
         field
@@ -168,17 +175,22 @@ export const action = async ({ request }) => {
   }`,
       {
         variables: {
-          "id": discountId,
-          "automaticAppDiscount": {
-            "context": {
-              "all": {
-                "All"
-              }
-            }
-          }
+          id: discountId,
+          automaticAppDiscount: {
+            title,
+            metafields: [
+              {
+                namespace: "default",
+                key: "function-configuration",
+                type: "json",
+                value: JSON.stringify(metafieldConfig),
+              },
+            ],
+          },
         },
-      },
+      }
     );
+
     return await res.json();
   }
 
