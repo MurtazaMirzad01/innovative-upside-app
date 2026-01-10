@@ -2,6 +2,10 @@ import { useFetcher, useLoaderData } from "react-router";
 import { useState, useEffect } from "react";
 
 export default function EditDiscount({ id, modalId, discountId }) {
+  console.log("???????????????????????");
+  console.log(discountId);
+  console.log("???????????????????????");
+  
   const fetcher = useFetcher();
   const loaderData = useLoaderData();
 
@@ -28,6 +32,7 @@ export default function EditDiscount({ id, modalId, discountId }) {
       setProducts(productField?.value ? JSON.parse(productField.value) : []);
     }
   }, [loaderData, id]);
+  
 
   function handleSubmit(event) {
     event.preventDefault();

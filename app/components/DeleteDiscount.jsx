@@ -5,7 +5,7 @@ export default function DeleteDiscount({ id, modalId, discountId }) { // Accept 
 
   console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
   console.log(discountId);
-  console.log("=================================================================");
+  console.log("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 
   function handleSubmit(event) {
     event.preventDefault();

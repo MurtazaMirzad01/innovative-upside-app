@@ -181,7 +181,7 @@ export const action = async ({ request }) => {
           },
           metafields: [
             {
-              namespace: "default",
+              namespace: "custom",
               key: "function-configuration",
               type: "json",
               value: JSON.stringify(metafieldConfig),

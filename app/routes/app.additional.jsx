@@ -66,6 +66,9 @@ export const action = async ({ request }) => {
   const discountId = formData.get("discountId");
   const actionType = formData.get("actionType");
 
+  console.log("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL");
+  console.log(discountId);
+  console.log("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL");
   //  Delete discount FIRST
   if (actionType === "delete") {
     if (discountId) {
@@ -154,42 +157,76 @@ export const action = async ({ request }) => {
     };
     //update Discounts
 
-    const updRes = await admin.graphql(
-      `#graphql
-  mutation discountAutomaticAppUpdate(
-    $automaticAppDiscount: DiscountAutomaticAppInput!,
-    $id: ID!
-  ) {
-    discountAutomaticAppUpdate(
-      automaticAppDiscount: $automaticAppDiscount,
-      id: $id
-    ) {
-      automaticAppDiscount {
-        title
+  //   const updRes = await admin.graphql(
+  //     `#graphql
+  // mutation discountAutomaticAppUpdate(
+  //   $automaticAppDiscount: DiscountAutomaticAppInput!,
+  //   $id: ID!
+  // ) {
+  //   discountAutomaticAppUpdate(
+  //     automaticAppDiscount: $automaticAppDiscount,
+  //     id: $id
+  //   ) {
+  //     automaticAppDiscount {
+  //       title
+  //     }
+  //     userErrors {
+  //       field
+  //       message
+  //     }
+  //   }
+  // }`,
+  //     {
+  //       variables: {
+  //         id: discountId,
+  //         automaticAppDiscount: {
+  //           title,
+  //           metafields: [
+  //             {
+  //               namespace: "customs",
+  //               key: "function-configuration",
+  //               type: "json",
+  //               value: JSON.stringify(metafieldConfig),
+  //             },
+  //           ],
+  //         },
+  //       },
+  //     }
+  //   );
+
+   const response = await admin.graphql(
+    `#graphql
+  mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+    metafieldsSet(metafields: $metafields) {
+      metafields {
+        key
+        namespace
+        value
+        createdAt
+        updatedAt
       }
       userErrors {
         field
         message
+        code
       }
     }
   }`,
-      {
-        variables: {
-          id: discountId,
-          automaticAppDiscount: {
-            title,
-            metafields: [
-              {
-                namespace: "default",
-                key: "function-configuration",
-                type: "json",
-                value: JSON.stringify(metafieldConfig),
-              },
-            ],
-          },
-        },
-      }
-    );
+  {
+    variables: {
+        "metafields": [
+            {
+                "key": "function-configuration",
+                "namespace": "custom",
+                "ownerId": discountId,
+                "type": "json",
+                "value": JSON.stringify(metafieldConfig)
+            }
+        ]
+    },
+  },
+  );
+  const json = await response.json();
 
     return await res.json();
   }
